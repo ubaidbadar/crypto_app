@@ -2,6 +2,8 @@ const User = require('../models/User');
 const { compare } = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generateError = require('../utility/generateError');
+const generateOTP = require('../utility/generateOTP');
+const phoneOTP = require('../lib/phoneOTP');
 
 const signInHandler = user => {
     const expiresIn = new Date().getTime() + 3600000;
@@ -11,16 +13,18 @@ const signInHandler = user => {
 
 exports.signup = async (req, res, next) => {
     try {
-        const { email, phone } = req.body;
+        const { email, phone, ...data } = req.body;
         if (email) {
             const user = await User.findOne({ email })
             if (user) generateError(401, 'User already exists with same email!');
+            data.emailOTP = generateOTP()
         }
         if (phone) {
             const user = await User.findOne({ phone })
             if (user) generateError(401, 'User already exists with same phone!');
+            const res = await phoneOTP.sendPhoneOTP("+12485795654")
         }
-        const user = await User.create(req.body);
+        const user = await User.create(data);
         res.status(201).json(signInHandler(user));
     }
     catch (err) {

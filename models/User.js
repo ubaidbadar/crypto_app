@@ -2,11 +2,6 @@
 const { Schema, model } = require('mongoose');
 
 
-const verifiedType = {
-    type: Boolean,
-    default: false
-}
-
 const User = new Schema({
     firstName: {
         type: String,
@@ -20,14 +15,10 @@ const User = new Schema({
         type: String,
         required: true
     },
-    email: {
-        type: String,
-    },
-    isEmailVerified: verifiedType,
-    phone: {
-        type: Number
-    },
-    isPhoneVerified: verifiedType,
+    email: String,
+    emailOTP: Number,
+    phone: Number,
+    phoneOTP: Number,
     role: {
         type: String,
         enum: ['Tear 1', 'Client', 'Admin'],
