@@ -16,15 +16,21 @@ const User = new Schema({
         required: true
     },
     email: String,
-    emailOTP: Number,
+    isEmailVerfied: {
+        type: Boolean,
+        default: false
+    },
     phone: Number,
-    phoneOTP: Number,
+    isPhoneVerfied: {
+        type: Number,
+        default: false
+    },
     role: {
         type: String,
         enum: ['Tear 1', 'Client', 'Admin'],
         default: 'Tear 1'
     }
-}, { timestamps: true })
+}, { timestamps: true });
 
 
 module.exports = model('users', User);

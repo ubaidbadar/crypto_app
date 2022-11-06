@@ -22,7 +22,7 @@ exports.signup = async (req, res, next) => {
         if (phone) {
             const user = await User.findOne({ phone })
             if (user) generateError(401, 'User already exists with same phone!');
-            const res = await phoneOTP.sendPhoneOTP("+12485795654")
+            await phoneOTP.sendPhoneOTP(phone)
         }
         const user = await User.create(data);
         res.status(201).json(signInHandler(user));
