@@ -17,17 +17,21 @@ const User = new Schema({
     },
     email: {
         type: String,
-        required: true,
         validate: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
-        unique: true
+        unique: true,
+        default: `${Date.now()}@test.com`
     },
     isEmailVerfied: {
         type: Boolean,
         default: false
     },
-    phone: Number,
+    phone: {
+        type: String,
+        unique: true,
+        default: `--${Date.now()}`
+    },
     isPhoneVerfied: {
-        type: Number,
+        type: Boolean,
         default: false
     },
     OTPSid: String,
