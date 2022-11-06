@@ -5,27 +5,25 @@ const generateError = require('../utility/generateError');
 const generateOTP = require('../utility/generateOTP');
 const phoneOTP = require('../lib/phoneOTP');
 
-const signInHandler = user => {
-    const expiresIn = new Date().getTime() + 3600000;
+const signInHandler = ({ password, OTPSid, email, ...user }) => {
+    if (user.email.includes('@test.com')) delete user.email;
+    const expiresIn = new Date(new Date().getTime() + 3600000).toISOString();
     const token = jwt.sign(user, process.env.JWT_SECRETE_KEY, { expiresIn: "1h" });
-    return { userId: _id, displayName, email, photoURL, token, expiresIn };
+    return { ...user, expiresIn, token };
 }
 
 exports.signup = async (req, res, next) => {
     try {
-        const { email, phone, ...data } = req.body;
-        if (email) {
-            const user = await User.findOne({ email })
-            if (user) generateError(401, 'User already exists with same email!');
-            data.emailOTP = generateOTP()
-        }
+        const { phone, ...data } = req.body;
+        if (!data.email) data.email = `${Date.now()}@test.com`;
         if (phone) {
             const user = await User.findOne({ phone })
             if (user) generateError(401, 'User already exists with same phone!');
-            await phoneOTP.sendPhoneOTP(phone)
+            User.OTPSid = (await phoneOTP.sendPhoneOTP(phone)).sid;
+            console.log(26)
         }
         const user = await User.create(data);
-        res.status(201).json(signInHandler(user));
+        res.status(201).json(signInHandler(user._doc));
     }
     catch (err) {
         next(err)

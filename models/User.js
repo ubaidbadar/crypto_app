@@ -15,7 +15,12 @@ const User = new Schema({
         type: String,
         required: true
     },
-    email: String,
+    email: {
+        type: String,
+        required: true,
+        validate: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+        unique: true
+    },
     isEmailVerfied: {
         type: Boolean,
         default: false
@@ -25,6 +30,7 @@ const User = new Schema({
         type: Number,
         default: false
     },
+    OTPSid: String,
     role: {
         type: String,
         enum: ['Tear 1', 'Client', 'Admin'],
