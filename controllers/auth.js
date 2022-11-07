@@ -15,11 +15,15 @@ exports.signup = async (req, res, next) => {
         const data = req.body;
         const phone = +data.phone;
         if (phone) {
+            const user = await User.findOne({ phone: `${phone}` });
+            if (user) generateError(403, "User already exist with same phone!");
             data.OTPSid = (await phoneOTP.sendPhoneOTP(phone)).sid;
             data.phone = phone
         }
         const user = await User.create(data);
-        res.status(201).json({ ...req.body, _id: user._id });
+        delete data.password;
+        delete data.OTPSid;
+        res.status(201).json({ ...data, _id: user._id });
     }
     catch (err) {
         next(err)
