@@ -6,11 +6,9 @@ const createWallet = (network = testnet) => {
 
   var privateKey = new PrivateKey();
   var address = privateKey.toAddress(network);
-  console.log(privateKey);
-  console.log(address);
   return {
     privateKey: privateKey.toString(),
-    address: address.toString(),
+    publicKey: address.toString(),
     network: network.toString()
   };
 };

@@ -6,10 +6,12 @@ require('dotenv').config();
 
 
 const auth = require('./routes/auth');
+const wallet = require('./routes/wallet');
 const { errorHandler } = require('./controllers/errorHandler');
 
 app.use(cors(), express.json(), express.urlencoded({ extended: true }));
 
+app.use('/wallet', wallet)
 app.use('/', auth);
 
 app.use(errorHandler);
