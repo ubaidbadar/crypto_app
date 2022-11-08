@@ -1,1 +1,0 @@
-module.exports = () => (Math.random() * 1000000).toFixed()
