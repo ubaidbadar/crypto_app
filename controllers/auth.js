@@ -17,7 +17,7 @@ exports.signup = async (req, res, next) => {
         if (phone) {
             const user = await User.findOne({ phone: `${phone}` });
             if (user) generateError(403, "User already exist with same phone!");
-            data.OTPSid = (await phoneOTP.sendPhoneOTP(phone)).sid;
+            (await phoneOTP.sendPhoneOTP(phone));
             data.phone = phone
         }
         const user = await User.create(data);
@@ -35,9 +35,7 @@ exports.verifyPhoneOTP = async (req, res, next) => {
         const { phone, code } = req.body;
         const user = await User.findOne({ phone: `${+phone}` }, {}, { select: 'OTPSid' });
         if (!user) generateError(404, `User with this ${phone} doesn't exists!`)
-        const rs = await phoneOTP.verifyPhoneOTP(phone, code, user.OTPSid);
-        console.log(rs);
-        console.log(user)
+        phoneOTP.verifyPhoneOTP(phone, code);
         res.status(201).json({ message: 'Successfully verified your phone!' })
     }
     catch (err) {
