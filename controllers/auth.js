@@ -1,14 +1,10 @@
 const User = require('../models/User');
 const { compare } = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const generateError = require('../utility/generateError');
 const phoneOTP = require('../lib/phoneOTP');
+const getUser = require('../utility/getUser');
+const signInHandler = require('../utility/signInHandler');
 
-const signInHandler = ({ password, OTPSid, email, ...user }) => {
-    const expiresIn = new Date(new Date().getTime() + 3600000).toISOString();
-    const token = jwt.sign(user, process.env.JWT_SECRETE_KEY, { expiresIn: "1h" });
-    return { ...user, expiresIn, token };
-}
 
 exports.signup = async (req, res, next) => {
     try {
@@ -20,10 +16,8 @@ exports.signup = async (req, res, next) => {
             (await phoneOTP.sendPhoneOTP(phone));
             data.phone = phone
         }
-        const user = await User.create(data);
-        delete data.password;
-        delete data.OTPSid;
-        res.status(201).json({ ...data, _id: user._id });
+        const userDOC = await User.create(data);
+        res.status(201).json(getUser(userDOC));
     }
     catch (err) {
         next(err)
@@ -33,11 +27,12 @@ exports.signup = async (req, res, next) => {
 exports.verifyPhoneOTP = async (req, res, next) => {
     try {
         const { phone, code } = req.body;
-        const user = await User.findOne({ phone: `${+phone}` }, {}, { select: 'OTPSid' });
+        const user = await User.findOne({ phone: `${+phone}` }, {}, { select: '-password' });
         if (!user) generateError(404, `User with this +${+phone} doesn't exists!`)
-        const r = await phoneOTP.verifyPhoneOTP(phone, code);
-        console.log(r)
-        res.status(201).json({ message: 'Successfully verified your phone!' })
+        await phoneOTP.verifyPhoneOTP(phone, code);
+        user.isPhoneVerfied = true;
+        await user.save();
+        signInHandler(user, res)
     }
     catch (err) {
         next(err)
@@ -46,18 +41,15 @@ exports.verifyPhoneOTP = async (req, res, next) => {
 
 
 
-exports.signin = (req, res, next) => {
-    const { email, password } = req.body;
-    let loggedUser = null;
-    User.findOne({ email }, {}, { select: '-password' })
-        .then(user => {
-            if (user) {
-                loggedUser = user;
-                return compare(password, user.password)
-            }
-            generateError(401, 'Email or password is invalid!');
-        })
-        .then(isEqual => isEqual ? signInHandler(loggedUser) : generateError(401, 'Email or Password is invalid!'))
-        .then(loadedUser => res.status(200).json(loadedUser))
-        .catch(next)
+exports.signin = async (req, res, next) => {
+    try {
+        const user = await User.findOne(req.body, {}, { select: '-password' });
+        if (!user) generateError(401, 'Invalid credentials !');
+        const isEqual = await compare(req.body.password, user.password);
+        if(!isEqual) generateError(401, 'Invalid credentials !');
+        signInHandler(user, res);
+    }
+    catch (err) {
+        next(err)
+    }
 }
