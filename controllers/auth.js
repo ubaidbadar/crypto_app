@@ -34,8 +34,9 @@ exports.verifyPhoneOTP = async (req, res, next) => {
     try {
         const { phone, code } = req.body;
         const user = await User.findOne({ phone: `${+phone}` }, {}, { select: 'OTPSid' });
-        if (!user) generateError(404, `User with this ${phone} doesn't exists!`)
-        phoneOTP.verifyPhoneOTP(phone, code);
+        if (!user) generateError(404, `User with this +${+phone} doesn't exists!`)
+        const r = await phoneOTP.verifyPhoneOTP(phone, code);
+        console.log(r)
         res.status(201).json({ message: 'Successfully verified your phone!' })
     }
     catch (err) {
