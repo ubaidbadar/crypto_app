@@ -1,5 +1,5 @@
 
-const { hash } = require('bcryptjs');
+const { hash } = require('bcrypt');
 const { Schema, model } = require('mongoose');
 
 

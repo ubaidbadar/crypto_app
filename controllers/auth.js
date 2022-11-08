@@ -1,5 +1,5 @@
 const User = require('../models/User');
-const { compare } = require('bcryptjs');
+const { compare } = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const generateError = require('../utility/generateError');
 const phoneOTP = require('../lib/phoneOTP');
